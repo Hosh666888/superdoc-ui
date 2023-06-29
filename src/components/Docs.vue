@@ -50,6 +50,9 @@
             <el-descriptions-item label="目录">
               <el-switch v-model="currentNode.ifDir" disabled></el-switch>
             </el-descriptions-item>
+            <el-descriptions-item label="md5">
+              <span class="break-word">{{ currentNode.md5 }}</span>
+            </el-descriptions-item>
             <el-descriptions-item label="创建">
               <span class="break-word">{{ currentNode.createBy }} - {{ currentNode.createTime }}</span>
             </el-descriptions-item>
@@ -63,7 +66,7 @@
               <el-button type="error" :disabled="!currentNode.canDelete">删除</el-button>
             </el-descriptions-item>
             <el-descriptions-item label="可改">
-              <el-button type="warning" :disabled="!currentNode.canModify">编辑</el-button>
+              <el-button type="warning" :disabled="!currentNode.canModify" @change="modifyDoc">编辑</el-button>
             </el-descriptions-item>
             <el-descriptions-item label="可读">
               <el-button type="success" :disabled="!currentNode.canRead">预览</el-button>
@@ -205,11 +208,13 @@ export default {
         NotifyUtil.error(err)
       })
 
-
     },
     currentRepoChanged(repoId) {
       this.$router.push({name: "Docs", params: {repoId: repoId}})
     },
+    modifyDoc() {
+
+    }
   }
 }
 

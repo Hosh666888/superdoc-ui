@@ -20,6 +20,10 @@ const routes = [
         path: "/docs/:repoId",
         component: () => import("@/components/Docs"),
         name: "Docs"
+    },
+    {
+        path: "/manage",
+        component:()=>import("@/components/manage/Manage")
     }
 ]
 
