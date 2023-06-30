@@ -23,7 +23,9 @@ const routes = [
     },
     {
         path: "/manage",
-        component:()=>import("@/components/manage/Manage")
+        // component:()=>import("@/components/manage/Manage1")
+        component: () => import("@/components/manage/Manage")
+
     }
 ]
 

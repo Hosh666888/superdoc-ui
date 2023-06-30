@@ -98,6 +98,7 @@ export default {
           LocalstorageUtil.clearAll()
           this.isLogin = false
           NotifyUtil.success("注销", "操作成功")
+          location.reload()
         } else {
           NotifyUtil.error("注销", data.message)
         }

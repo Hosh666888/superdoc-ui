@@ -4,6 +4,8 @@ export default {
     success, warning, info, error
 }
 
+const offset = 30
+
 
 function success(title, message) {
     ElNotification({
@@ -11,7 +13,7 @@ function success(title, message) {
         message: message,
         type: 'success',
         duration: 2500,
-        offset:28
+        offset: offset
     })
 }
 
@@ -22,8 +24,8 @@ function warning(title, message) {
         title: title,
         message: message,
         type: 'warning',
-        duration:3500,
-        offset:28
+        duration: 3500,
+        offset: offset
     })
 }
 
@@ -33,8 +35,8 @@ function info(title, message) {
         title: title,
         message: message,
         type: 'info',
-        duration:3500,
-        offset:28
+        duration: 3500,
+        offset: offset
     })
 }
 
@@ -45,7 +47,7 @@ function error(title, message) {
         title: title,
         message: message,
         type: 'error',
-        offset:28
+        offset: offset
     })
 }
 
