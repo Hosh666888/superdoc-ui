@@ -77,6 +77,7 @@
             <el-button link type="primary" size="small" @click="modifyUser" :disabled="scope.row.role==='SUPERADMIN'">
               修改
             </el-button>
+
             <el-popconfirm
                 width="200"
                 :title="'确定重置用户 '+scope.row.nickname +'('+scope.row.username+') 的密码吗?'"
@@ -253,7 +254,7 @@ export default {
       UserApi.getUserPageList(queryData).then(res => {
         let code = res.data.code
         let data = res.data.data
-        console.log(data)
+        // console.log(data)
         if (code === 0) {
           this.userList = []
           let content = data.content
