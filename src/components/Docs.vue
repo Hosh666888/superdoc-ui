@@ -112,16 +112,6 @@ export default {
       NotifyUtil.error(err.message)
     })
 
-    DocApi.getMyDocVO(0).then(res => {
-      let data = res.data
-      if (data.code === 0) {
-        this.treeData.children = wrapTreeNode(data.data, 0)
-      } else {
-        NotifyUtil.warning(data.message)
-      }
-    }).catch(err => {
-      NotifyUtil.error(err)
-    })
 
   },
   data() {
@@ -192,12 +182,13 @@ export default {
       this.currentNode = data
       this.drawerVisible = true; // 打开属性信息弹出层
 
+      console.log(this.currentRepo);
+
       if (data.isLeaf || !data.ifDir || (data.children != null && data.children.length > 0) || !data.canRead) {
         // NotifyUtil.warning("不给你查")
         return
       }
-
-      DocApi.getMyDocVO(data.id).then(res => {
+      DocApi.getMyDocVO(data.id, this.currentRepo).then(res => {
         let code = res.data.code
         if (code === 0) {
           data.children = wrapTreeNode(res.data.data, data.id)
@@ -211,6 +202,29 @@ export default {
     },
     currentRepoChanged(repoId) {
       this.$router.push({name: "Docs", params: {repoId: repoId}})
+      this.treeData = [
+        {
+          id: 0,
+          parentId: -1,
+          name: 'root',
+          path: '',
+          extention: "",
+          md5: "",
+          ifDir: true,
+          desc: '根目录',
+          createTime: "",
+          createBy: "System",
+          updateTime: "",
+          updateBy: "System",
+          canWrite: true,
+          canDelete: false,
+          canModify: false,
+          canRead: true,
+          isLeaf: false,
+          imgSrc: "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
+          children: []
+        }
+      ]
     },
     modifyDoc() {
 
@@ -261,7 +275,6 @@ function wrapTreeNode(myDocVos, parentId) {
   min-width: 200px;
   border-right: 1px #e6dfdf solid;
   padding: 8px 10px;
-  /*width: auto;*/
 }
 
 

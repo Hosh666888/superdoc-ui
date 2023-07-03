@@ -2,7 +2,7 @@ import customAxios from "@/network/main";
 
 
 export default {
-    login, logout, auth, authControlPage, getUserPageList, addUser, restPassword
+    login, logout, auth, authControlPage, getUserPageList, addUser, restPassword,dropDown
 }
 
 
@@ -38,4 +38,14 @@ function addUser(data) {
 
 function restPassword(uid) {
     return customAxios.post('u/restPassword/' + uid)
+}
+
+function dropDown(role) {
+    return customAxios({
+        method: 'get',
+        url: '/u/dropDown',
+        params: {
+            role: role
+        }
+    })
 }

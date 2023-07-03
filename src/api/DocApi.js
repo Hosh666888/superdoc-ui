@@ -5,6 +5,6 @@ export default {
 }
 
 
-function getMyDocVO(parentId) {
-    return customAxios.get("/doc/my", {params: {parentId: parentId}})
+function getMyDocVO(parentId, repoId) {
+    return customAxios.get("/doc/my", {params: {parentId: parentId, repoId: repoId}})
 }

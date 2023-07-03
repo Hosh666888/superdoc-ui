@@ -15,7 +15,18 @@
       </el-form>
     </div>
 
-    <div style="min-width: 600px">
+    <el-pagination
+        :current-page="pageIndex"
+        :page-size="pageSize"
+        :page-sizes="[5, 10, 30, 50]"
+        small
+        layout="total,sizes,prev, pager, next"
+        :total="total"
+        @size-change="pageSizeChanged"
+        @current-change="handlePageChange"
+    ></el-pagination>
+
+    <div style="min-width: 600px;">
       <el-collapse v-model="userGroupList">
         <el-collapse-item :title="item.name" v-for="(item,index) in userGroupList" :name="index" :key="index">
 
@@ -31,10 +42,10 @@
 
           <div style="margin: 10px 10px;display: flex">
             <el-button
-                type="success"
+                type="warning"
                 size="small"
                 @click="openUserGroupModifier(item)">
-              添加成员
+              修改信息
             </el-button>
 
 
@@ -87,25 +98,46 @@
     </div>
 
 
-    <div>
-      <el-pagination
-          v-model:current-page="pageIndex"
-          v-model:page-size="pageSize"
-          :page-sizes="[5, 10, 30, 50]"
-          small
-          layout="total,sizes,prev, pager, next"
-          :total="total"
-          @size-change="pageSizeChanged"
-          @current-change="handlePageChange"
-      ></el-pagination>
-    </div>
-
-
     <div class="dialogs">
       <!--      新增用户至用户组-->
       <!--      新增用户组-->
-      <UserGroupModifier v-if="showAddUser2GroupDialog" :data="addUser2GroupTempGroupData"/>
+      <el-dialog
+          :title="addUser2GroupDialogTitle"
+          v-model="showAddUser2GroupDialog"
+      >
+        <el-form :model="newUserGroupForm" label-width="120px">
+          <el-form-item label="组名" prop="username">
+            <el-input clearable v-model="newUserGroupForm.name"></el-input>
+          </el-form-item>
 
+          <el-form-item label="描述" prop="nickname">
+            <el-input type="textarea" show-word-limit maxlength="50" clearable
+                      v-model="newUserGroupForm.remark"></el-input>
+          </el-form-item>
+
+          <el-form-item label="成员" prop="users">
+            <el-select
+                v-model="newUserGroupForm.users"
+                multiple
+                clearable
+                collapse-tags
+                :max-collapse-tags="1"
+            >
+              <el-option
+                  v-for="item in userDropDown"
+                  :key="item.id"
+                  :label="item.data"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="showAddUser2GroupDialog = false">取消</el-button>
+            <el-button type="primary" @click="addOrUpdateUserGroup">确定</el-button>
+          </div>
+        </el-form>
+
+      </el-dialog>
     </div>
 
 
@@ -116,12 +148,23 @@
 <script>
 import UserGroupApi from "@/api/UserGroupApi";
 import NotifyUtil from "@/utils/NotifyUtil";
-import UserGroupModifier from "@/components/manage/UserGroupModifier";
+import UserApi from "@/api/UserApi";
 
 export default {
   name: "UserGroupControl",
   created() {
     this.getUserGroupList()
+
+    UserApi.dropDown().then(res => {
+      let code = res.data.code
+      if (code === 0) {
+        this.userDropDown = res.data.data
+        // console.log(this.userDropDown);
+      } else {
+        NotifyUtil.warning("删除用户组", res.data.message)
+      }
+    }).catch(err => NotifyUtil.error("获取用户下拉列表", err))
+
   },
   data() {
     return {
@@ -129,6 +172,8 @@ export default {
       groupName: '',
       dialogVisible: false,
       showAddUser2GroupDialog: false,
+      addUser2GroupDialogTitle: '',
+      addUser2GroupDialogFlag: 0, //0:add 1:update
       userGroupList: [
         // {
         //   "id": 0,
@@ -144,10 +189,16 @@ export default {
         //   "remark": ""
         // }
       ],
-      addUser2GroupTempGroupData: {},
+      newUserGroupForm: {
+        id: null,
+        name: '',
+        users: [],
+        remark: ''
+      },
       pageIndex: 1,
       pageSize: 10,
-      total: 1
+      total: 1,
+      userDropDown: []
     }
   },
   methods: {
@@ -183,11 +234,57 @@ export default {
       this.getUserGroupList()
     },
     removeUserFromGroup(groupId, userId) {
-      console.log(groupId, userId)
-      NotifyUtil.warning("移除。。。")
+      console.log("移除用户(userGroup)", groupId, userId)
+      UserGroupApi.removeUserByUid(groupId, userId).then(res => {
+        let code = res.data.code
+        let flag = 0
+        if (code === 0) {
+          NotifyUtil.success("移除用户", "操作成功")
+        } else {
+          flag = -1
+          NotifyUtil.warning("移除用户", res.data.message)
+        }
+        return flag
+      })
+          .then(flag => {
+            if (flag === 0) {
+              for (let item of this.userGroupList) {
+                if (groupId === item.id) {
+                  item.users = item.users.filter(item => item !== userId)
+                }
+              }
+            }
+          })
+          .catch(err => NotifyUtil.error("移除用户", err))
     },
     openUserGroupModifier(userGroupVo) {
-      this.addUser2GroupTempGroupData = userGroupVo
+      if (userGroupVo == null) {
+        this.newUserGroupForm = {
+          id: null,
+          name: '',
+          users: [],
+          remark: ''
+        }
+        this.addUser2GroupDialogFlag = 0
+        this.addUser2GroupDialogTitle = "新增用户组"
+      } else {
+        let users = []
+        if(userGroupVo.users != null){
+          for (let item of userGroupVo.users) {
+            users.push(item.id)
+          }
+        }
+
+        this.newUserGroupForm = {
+          id: userGroupVo.id,
+          name: userGroupVo.name,
+          users: users,
+          remark: userGroupVo.remark
+        }
+        this.addUser2GroupDialogFlag = 1
+        this.addUser2GroupDialogTitle = "更新用户组"
+      }
+
       this.showAddUser2GroupDialog = true
     },
     userCount(users) {
@@ -195,13 +292,53 @@ export default {
       return users.length
     },
     deleteUserGroup(groupId) {
-      console.log(groupId)
+      console.log("删除用户组", groupId)
+      UserGroupApi.deleteUserGroupById(groupId).then(res => {
+        let code = res.data.code
+        let flag = 0
+        if (code === 0) {
+          NotifyUtil.success("删除用户组", "操作成功")
+        } else {
+          NotifyUtil.warning("删除用户组", res.data.message)
+          flag = -1
+        }
+        return flag
+      }).then(flag => {
+        if (flag === 0) {
+          this.getUserGroupList()
+        }
+      }).catch(err => NotifyUtil.error("删除用户组", err))
+    },
+    addOrUpdateUserGroup() {
+      console.log(this.addUser2GroupDialogFlag === 0 ? "新增组" : "更新组", this.newUserGroupForm)
+      if (this.addUser2GroupDialogFlag === 0) {
+        UserGroupApi.addUserGroup(this.newUserGroupForm).then(res => {
+          let code = res.data.code
+          if (code === 0) {
+            NotifyUtil.success("添加用户组", "成功")
+            this.getUserGroupList()
+          } else {
+            NotifyUtil.warning("添加用户组", res.data.message)
+          }
+        }).catch(err => NotifyUtil.error("添加用户组", err))
+      } else if (this.addUser2GroupDialogFlag === 1) {
+        UserGroupApi.modifyUserGroup(this.newUserGroupForm).then(res => {
+          let code = res.data.code
+          if (code === 0) {
+            NotifyUtil.success("更新用户组", "成功")
+            this.getUserGroupList()
+          } else {
+            NotifyUtil.warning("更新用户组", res.data.message)
+          }
+        }).catch(err => NotifyUtil.error("更新用户组", err))
+      }
+
+      this.showAddUser2GroupDialog = false
+
     }
 
-  },
-  components: {
-    UserGroupModifier
   }
+
 }
 </script>
 
