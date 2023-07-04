@@ -1,23 +1,9 @@
 <template>
   <div id="manage-container">
-    <el-tabs tab-position="left">
-      <el-tab-pane label="系统信息">
-        <SystemInfo/>
-      </el-tab-pane>
-      <el-tab-pane label="用户">
-        <UserControl/>
-      </el-tab-pane>
-      <el-tab-pane label="用户组">
-        <UserGroupControl/>
-      </el-tab-pane>
-      <el-tab-pane label="仓库">
-        <RepoControl/>
-      </el-tab-pane>
-      <el-tab-pane label="仓库授权">
-        <RepoAuth/>
-      </el-tab-pane>
-      <el-tab-pane label="文档授权">
-        <DocAuth/>
+    <el-tabs tab-position="left" v-model="activeTab">
+      <el-tab-pane v-for="tab in tabs" :label="tab.label" :name="tab.label" :key="tab.label"
+                   @click="activeTab = tab.label">
+        <component :is="tab.component" v-if="activeTab===tab.label"></component>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -45,6 +31,19 @@ export default {
       NotifyUtil.error(err)
     })
   },
+  data() {
+    return {
+      activeTab: '系统信息',
+      tabs: [
+        {label: '系统信息', component: SystemInfo},
+        {label: '用户', component: UserControl},
+        {label: '用户组', component: UserGroupControl},
+        {label: '仓库', component: RepoControl},
+        {label: '仓库授权', component: RepoAuth},
+        {label: '文档授权', component: DocAuth},
+      ]
+    }
+  },
   components: {
     DocAuth,
     RepoAuth,
@@ -52,8 +51,7 @@ export default {
     UserGroupControl,
     UserControl,
     SystemInfo
-  },
-  methods: {}
+  }
 }
 </script>
 

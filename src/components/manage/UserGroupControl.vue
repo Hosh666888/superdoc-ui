@@ -15,18 +15,8 @@
       </el-form>
     </div>
 
-    <el-pagination
-        :current-page="pageIndex"
-        :page-size="pageSize"
-        :page-sizes="[5, 10, 30, 50]"
-        small
-        layout="total,sizes,prev, pager, next"
-        :total="total"
-        @size-change="pageSizeChanged"
-        @current-change="handlePageChange"
-    ></el-pagination>
 
-    <div style="min-width: 600px;">
+    <div style="min-width: 600px;min-height: 400px;max-height:500px;overflow-y: scroll;scroll-behavior: smooth;">
       <el-collapse v-model="userGroupList">
         <el-collapse-item :title="item.name" v-for="(item,index) in userGroupList" :name="index" :key="index">
 
@@ -39,15 +29,13 @@
             <el-descriptions-item label="描述">{{ item.remark }}</el-descriptions-item>
           </el-descriptions>
 
-
-          <div style="margin: 10px 10px;display: flex">
+          <div style="margin: 10px 20px;display: flex">
             <el-button
                 type="warning"
                 size="small"
                 @click="openUserGroupModifier(item)">
               修改信息
             </el-button>
-
 
             <el-popconfirm
                 width="200"
@@ -64,14 +52,12 @@
                 </el-button>
               </template>
             </el-popconfirm>
-
           </div>
-
 
           <el-table
               :data="item.users"
               border
-              style="width: 50%;"
+              style="width: 50%;margin-left: 20px"
           >
             <el-table-column prop="data" label="用户名" width="180" fixed/>
 
@@ -90,13 +76,22 @@
                 </el-popconfirm>
               </template>
             </el-table-column>
-
           </el-table>
 
         </el-collapse-item>
       </el-collapse>
     </div>
 
+    <el-pagination
+        :current-page="searchCondition.pageIndex"
+        :page-size="searchCondition.pageSize"
+        :page-sizes="[5, 10, 30, 50]"
+        small
+        layout="total,sizes,prev, pager, next"
+        :total="searchCondition.total"
+        @size-change="pageSizeChanged"
+        @current-change="handlePageChange"
+    ></el-pagination>
 
     <div class="dialogs">
       <!--      新增用户至用户组-->
@@ -159,7 +154,6 @@ export default {
       let code = res.data.code
       if (code === 0) {
         this.userDropDown = res.data.data
-        // console.log(this.userDropDown);
       } else {
         NotifyUtil.warning("删除用户组", res.data.message)
       }
@@ -168,36 +162,22 @@ export default {
   },
   data() {
     return {
-      authPass: false,
       groupName: '',
-      dialogVisible: false,
       showAddUser2GroupDialog: false,
       addUser2GroupDialogTitle: '',
       addUser2GroupDialogFlag: 0, //0:add 1:update
-      userGroupList: [
-        // {
-        //   "id": 0,
-        //   "name": "",
-        //   "users": [
-        //     {
-        //       "id": 0,
-        //       "data": ""
-        //     }
-        //   ],
-        //   "createTime": "2023-06-30 16:24:22",
-        //   "updateTime": "2023-06-30 16:24:22",
-        //   "remark": ""
-        // }
-      ],
+      userGroupList: [],
       newUserGroupForm: {
         id: null,
         name: '',
         users: [],
         remark: ''
       },
-      pageIndex: 1,
-      pageSize: 10,
-      total: 1,
+      searchCondition: {
+        pageIndex: 1,
+        pageSize: 10,
+        total: 0
+      },
       userDropDown: []
     }
   },
@@ -205,8 +185,8 @@ export default {
     getUserGroupList() {
       let data = {
         name: this.groupName,
-        pageIndex: this.pageIndex - 1,
-        pageSize: this.pageSize
+        pageIndex: this.searchCondition.pageIndex - 1,
+        pageSize: this.searchCondition.pageSize
       }
       UserGroupApi.getUserGroupList(data).then(res => {
         let code = res.data.code
@@ -216,9 +196,9 @@ export default {
           for (let item of content) {
             this.userGroupList.push(item)
           }
-          this.currentPage = data.number + 1
-          this.pageSize = data.size
-          this.total = data.totalElements
+          this.searchCondition.pageIndex = res.data.data.number + 1
+          this.searchCondition.pageSize = res.data.data.size
+          this.searchCondition.total = res.data.data.totalElements
         } else {
           NotifyUtil.warning('获取用户组列表', res.data.message)
         }
@@ -226,11 +206,13 @@ export default {
         NotifyUtil.error("获取用户组列表", err)
       })
     },
-    pageSizeChanged() {
-      this.pageIndex = 1
+    pageSizeChanged(newPageSize) {
+      this.searchCondition.pageIndex = 1
+      this.searchCondition.pageSize = newPageSize
       this.getUserGroupList()
     },
-    handlePageChange() {
+    handlePageChange(newPage) {
+      this.searchCondition.pageIndex = newPage
       this.getUserGroupList()
     },
     removeUserFromGroup(groupId, userId) {
@@ -269,7 +251,7 @@ export default {
         this.addUser2GroupDialogTitle = "新增用户组"
       } else {
         let users = []
-        if(userGroupVo.users != null){
+        if (userGroupVo.users != null) {
           for (let item of userGroupVo.users) {
             users.push(item.id)
           }
@@ -350,6 +332,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 20px;
 }
 
 

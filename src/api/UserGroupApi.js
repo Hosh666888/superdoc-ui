@@ -2,7 +2,7 @@ import customAxios from "@/network/main";
 
 
 export default {
-    getUserGroupList, modifyUserGroup, deleteUserGroupById, addUserGroup, removeUserByUid
+    getUserGroupList, modifyUserGroup, deleteUserGroupById, addUserGroup, removeUserByUid, dropDown
 }
 
 function getUserGroupList(data) {
@@ -14,11 +14,6 @@ function getUserGroupList(data) {
 }
 
 function modifyUserGroup(data) {
-    // let newUsers = []
-    // for (let item of data.users) {
-    //     newUsers.push(item.id)
-    // }
-    // data.users = newUsers
     return customAxios.post("/ug/modify", data)
 }
 
@@ -42,4 +37,11 @@ function removeUserByUid(groupId, uid) {
         uid: uid
     }
     return customAxios.post("/ug/removeUser", data)
+}
+
+function dropDown() {
+    return customAxios({
+        method: 'get',
+        url: '/ug/dropDown'
+    })
 }

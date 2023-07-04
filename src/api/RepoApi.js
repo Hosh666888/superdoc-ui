@@ -1,7 +1,7 @@
 import customAxios from "@/network/main";
 
 export default {
-    getMyRepos, addRepo, updateRepo, deleteRepo, getRepoList
+    getMyRepos, addRepo, updateRepo, deleteRepo, getRepoList, dropDown
 }
 
 
@@ -30,6 +30,16 @@ function getRepoList(name, pageIndex, pageSize) {
             name: name,
             pageIndex: pageIndex,
             pageSize: pageSize
+        }
+    })
+}
+
+function dropDown(name) {
+    return customAxios({
+        method: 'get',
+        url: '/repo/dropDown',
+        params: {
+            name: name
         }
     })
 }

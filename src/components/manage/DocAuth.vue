@@ -17,5 +17,12 @@ export default {
 </script>
 
 <style scoped>
+#doc-auth-container {
+  padding-left: 5px;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 
 </style>
