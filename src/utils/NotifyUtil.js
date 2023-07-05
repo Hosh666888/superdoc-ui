@@ -12,7 +12,7 @@ function success(title, message) {
         title: title,
         message: message,
         type: 'success',
-        duration: 1000,
+        duration: 900,
         offset: offset
     })
 }

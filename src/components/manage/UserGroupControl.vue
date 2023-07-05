@@ -16,7 +16,7 @@
     </div>
 
 
-    <div style="min-width: 600px;min-height: 400px;max-height:500px;overflow-y: scroll;scroll-behavior: smooth;">
+    <div style="min-width: 600px;min-height: 500px;max-height:500px;overflow-y: scroll;scroll-behavior: smooth;">
       <el-collapse v-model="userGroupList">
         <el-collapse-item :title="item.name" v-for="(item,index) in userGroupList" :name="index" :key="index">
 

@@ -37,11 +37,11 @@ export default {
       info: {
         "bathPath": "",
         "tempPath": "",
-        "maxUploadThreadCount": 0,
-        "sliceSize": 0,
-        "autoDeleteTempSlice": false,
-        "logFlushMaxCount": 0,
-        "logFlushInterval": 0,
+        "maxUploadThreadCount": null,
+        "sliceSize": null,
+        "autoDeleteTempSlice": null,
+        "logFlushMaxCount": null,
+        "logFlushInterval": null,
         "resourceUrl": "",
         "resourceLocation": "",
         "resetPassword": ""

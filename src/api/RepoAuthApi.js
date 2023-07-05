@@ -9,7 +9,7 @@ function add(data) {
 }
 
 function modify(data) {
-    return customAxios.post("/repoAuth/,modify", data)
+    return customAxios.post("/repoAuth/modify", data)
 }
 
 

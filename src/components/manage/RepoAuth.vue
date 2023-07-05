@@ -13,7 +13,7 @@
       </el-form-item>
     </el-form>
 
-    <div style="min-width: 600px;min-height: 400px;max-height:500px;overflow-y: scroll;scroll-behavior: smooth;">
+    <div style="min-width: 600px;min-height: 500px;max-height:500px;overflow-y: scroll;scroll-behavior: smooth;">
       <el-collapse v-model="repoAuthList">
         <el-collapse-item :title="item.repoName" v-for="(item,index) in repoAuthList" :name="index" :key="index">
 
@@ -21,7 +21,9 @@
             <el-descriptions-item label="人员">
               <el-tag>{{ userCount(item.authedUserDropDown) }}</el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="创建人">{{ item.createBy }}</el-descriptions-item>
             <el-descriptions-item label="创建时间">{{ item.createTime }}</el-descriptions-item>
+            <el-descriptions-item label="最后修改人">{{ item.updateBy }}</el-descriptions-item>
             <el-descriptions-item label="修改时间">{{ item.updateTime }}</el-descriptions-item>
           </el-descriptions>
 
@@ -57,7 +59,7 @@
                 border
                 style="width: 50%;margin-left: 20px"
             >
-              <el-table-column prop="data" label="授权用户组" width="180" fixed/>
+              <el-table-column prop="data" label="授权用户组" width="180"/>
 
               <el-table-column label="操作" width="150">
                 <template #default="scope">
@@ -82,7 +84,7 @@
                 :data="item.removedUserDropDown"
                 border
                 style="width: 50%;margin-left: 20px">
-              <el-table-column prop="data" label="剔除用户" width="180" fixed/>
+              <el-table-column prop="data" label="剔除用户" width="180"/>
 
               <el-table-column label="操作" width="150">
                 <template #default="scope">
@@ -108,7 +110,7 @@
                 border
                 style="width: 50%;margin-left: 20px"
             >
-              <el-table-column prop="data" label="已授权用户" width="180" fixed/>
+              <el-table-column prop="data" label="已授权用户" width="180"/>
 
               <el-table-column label="操作" width="150">
                 <template #default="scope">
@@ -146,6 +148,7 @@
         @current-change="handlePageChange"
     ></el-pagination>
 
+
     <div class="dialogs">
       <el-dialog
           :title="dialogTitle"
@@ -154,13 +157,13 @@
         <el-form :model="dialogTempData" label-width="120px">
           <el-form-item label="仓库">
             <el-select v-model="dialogTempData.repoId"
-                       :diabled="dialogOperateMode===1"
+                       :disabled="dialogOperateMode===1"
                        clearable
             >
-              <el-option v-for="option in repoDropDown"
-                         :key="option.label"
-                         :label="option.data"
-                         :value="option.id"
+              <el-option v-for="item in repoDropDown"
+                         :key="item.value"
+                         :label="item.label"
+                         :value="item.value"
               />
             </el-select>
 
@@ -170,15 +173,15 @@
             <el-select v-model="dialogTempData.userGroupIds"
                        multiple
                        clearable
-                       search
                        collapse-tags
                        :max-collapse-tags="1"
                        filterable
+
             >
               <el-option v-for="(option,i) in userGroupDropDown"
                          :key="i"
-                         :label="option.data"
-                         :value="option.id"
+                         :label="option.label"
+                         :value="option.value"
               />
             </el-select>
           </el-form-item>
@@ -194,8 +197,8 @@
             >
               <el-option v-for="option in userDropDown"
                          :key="option.label"
-                         :label="option.data"
-                         :value="option.id"
+                         :label="option.label"
+                         :value="option.value"
               />
             </el-select>
           </el-form-item>
@@ -235,35 +238,7 @@ export default {
       showDialog: false,
       dialogTitle: '',
       dialogOperateMode: 0, //0:add 1:update
-      repoAuthList: [
-        // {
-        //   "id": 0,
-        //   "repoId": 0,
-        //   "repoName": '仓库名称',
-        //   "createBy": "创建人",
-        //   "updateBy": "修改人",
-        //   "createTime": "2023-07-04 10:45:07",
-        //   "updateTime": "2023-07-04 10:45:07",
-        //   "userGroupDropDown": [
-        //     {
-        //       "id": 0,
-        //       "data": ""
-        //     }
-        //   ],
-        //   "removedUserDropDown": [
-        //     {
-        //       "id": 0,
-        //       "data": ""
-        //     }
-        //   ],
-        //   "authedUserDropDown": [
-        //     {
-        //       "id": 0,
-        //       "data": ""
-        //     }
-        //   ]
-        // }
-      ],
+      repoAuthList: [],
       dialogTempData: {
         id: null,
         repoId: null,
@@ -285,7 +260,6 @@ export default {
         pageSize: this.searchCondition.pageSize
       }
       this.repoAuthList = []
-
       RepoAuthApi.list(data).then(res => {
         let code = res.data.code
         if (code === 0) {
@@ -297,7 +271,6 @@ export default {
           NotifyUtil.warning('查询仓库授权数据', res.data.message)
         }
       }).catch(err => NotifyUtil.error('查询仓库授权数据', err))
-
     },
     getRepoDropDown() {
       RepoApi.dropDown(null).then(res => {
@@ -389,6 +362,7 @@ export default {
           repoId: vo.repoId,
           userGroupIds: userGroupIds,
           removeUserIds: removedUserIds
+
         }
         this.dialogOperateMode = 1
         this.dialogTitle = "修改仓库认证信息"
@@ -454,15 +428,15 @@ export default {
       let r
       if (this.dialogOperateMode === 0) {
         r = RepoAuthApi.add({
-          "repoId": this.dialogTempData.repoId,
-          "userGroupIds": this.dialogTempData.userGroupIds,
-          "removeUserIds": this.removeUserIds
+          repoId: this.dialogTempData.repoId,
+          userGroupIds: this.dialogTempData.userGroupIds,
+          removeUserIds: this.dialogTempData.removeUserIds
         })
       } else {
         r = RepoAuthApi.modify({
-          "id": this.dialogTempData.id,
-          "userGroupIds": this.dialogTempData.userGroupIds,
-          "removeUserIds": this.removeUserIds
+          id: this.dialogTempData.id,
+          userGroupIds: this.dialogTempData.userGroupIds,
+          removeUserIds: this.dialogTempData.removeUserIds
         })
       }
 
@@ -474,7 +448,7 @@ export default {
           NotifyUtil.warning(this.dialogTitle, res.data.message)
         }
       }).catch(err => NotifyUtil.error(this.dialogTitle, err))
-
+      this.showDialog = false
 
     },
   }

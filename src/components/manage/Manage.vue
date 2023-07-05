@@ -26,6 +26,7 @@ export default {
       if (res.data.code !== 0) {
         NotifyUtil.warning("页面检验", "不具备访问权限");
         history.back()
+        this.activeTab = null
       }
     }).catch(err => {
       NotifyUtil.error(err)

@@ -17,7 +17,7 @@
     </div>
 
     <div>
-      <el-table :data="repoList" style="width: 100%;min-height: 400px" border>
+      <el-table :data="repoList" style="width: 100%;min-height: 500px;max-height: 500px" border>
         <el-table-column prop="name" label="名称" width="120" fixed/>
         <el-table-column prop="desc" label="描述" width="300"/>
         <el-table-column prop="createBy" label="创建人" width="120"/>
